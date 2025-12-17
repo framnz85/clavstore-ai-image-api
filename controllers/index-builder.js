@@ -72,7 +72,7 @@ async function addId(newId) {
 
 exports.buildIndex = async (req, res) => {
   const estoreid = new ObjectId(req.headers.estoreid);
-  const resellid = String(req.headers.resellid);
+  const resellid = req.headers.resellid?.toString().trim();
   const dbPath = path.join(
     __dirname,
     "product-db",

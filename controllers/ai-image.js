@@ -108,7 +108,7 @@ const loadInitials = async (estoreid) => {
 })();
 
 exports.searchProduct = async (req, res) => {
-  const estoreid = String(req.headers.estoreid);
+  const estoreid = req.headers.estoreid?.toString().trim();
   const DB_PATH = path.join(
     __dirname,
     "product-db",

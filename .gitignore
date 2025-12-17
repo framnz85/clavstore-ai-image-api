@@ -1,5 +1,6 @@
 node_modules
 .env
+package-lock.json
 controllers/models
 controllers/product-db
 controllers/product-images
