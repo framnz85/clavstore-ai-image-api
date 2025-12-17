@@ -1,0 +1,7 @@
+node_modules
+.env
+controllers/models
+controllers/product-db
+controllers/product-images
+controllers/vectors
+controllers/estoreids.json
