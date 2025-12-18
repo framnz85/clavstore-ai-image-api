@@ -83,27 +83,33 @@ exports.buildIndex = async (req, res) => {
     "vectors",
     "vectors" + estoreid + ".bin"
   );
+  const IMG_URL = path.join(__dirname, "product-images", "package" + estoreid);
 
   try {
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath);
+    }
+
+    if (fs.existsSync(OUT_INDEX)) {
+      fs.unlinkSync(OUT_INDEX);
+    }
+
+    if (fs.existsSync(IMG_URL)) {
+      fs.rmSync(IMG_URL, {
+        recursive: true,
+        force: true,
+      });
+    }
+
     await Estore(resellid).findOneAndUpdate(
       { _id: new ObjectId(req.headers.estoreid) },
       { indexing: true, estoreChange: new Date().valueOf() }
     );
 
-    // const estore = await Estore.findOne({
-    //   _id: new ObjectId(estoreid),
-    // })
-    //   .populate("upgradeType upStatus2")
-    //   .exec();
-
     const queryTxt = {
       estoreid: new ObjectId(estoreid),
       "images.0": { $exists: true },
     };
-
-    // if (estore.upgradeType !== "2" || estore.upStatus2 !== "Active") {
-    //   queryTxt.aiIndex = true;
-    // }
 
     queryTxt.aiIndex = true;
 
