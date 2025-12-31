@@ -117,12 +117,10 @@ exports.searchProduct = async (req, res) => {
   const db = JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
 
   try {
-    if (!session) return res.status(500).json({ error: "Model not ready" });
-    if (!req.file) return res.status(400).json({ error: "No photo uploaded" });
+    if (!session) return res.json({ err: "Model not ready" });
+    if (!req.file) return res.json({ err: "No photo uploaded" });
     if (!index[estoreid])
-      return res
-        .status(500)
-        .json({ error: "Index not loaded. Build the index first." });
+      return res.json({ err: "Index not loaded. Build the index first." });
 
     const feeds = await makeFeedsForSession(session, req.file.buffer, 224);
     const outputs = await session.run(feeds);
@@ -136,9 +134,7 @@ exports.searchProduct = async (req, res) => {
       outKeys[0];
     const embTensor = outputs[embKey];
     if (!embTensor)
-      return res
-        .status(500)
-        .json({ error: "Embedding not found in model outputs" });
+      return res.json({ err: "Embedding not found in model outputs" });
 
     const embData = embTensor.data;
     let norm = 0;
@@ -178,6 +174,6 @@ exports.searchProduct = async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(500).json({ error: String(err) });
+    return res.json({ error: String(err) });
   }
 };
