@@ -439,7 +439,6 @@ estoreSchema.index(
   }
 );
 
-const EstoreResell = (estoreid) =>
-  conn[estoreid].model("GratisEstore", estoreSchema);
+const Estore = (estoreid) => conn[estoreid].model("GratisEstore", estoreSchema);
 
-module.exports = EstoreResell;
+module.exports = Estore;

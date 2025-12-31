@@ -2,8 +2,6 @@ const sharp = require("sharp");
 const ort = require("onnxruntime-node");
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
-const { URL } = require("url");
 
 const CACHE_ROOT = path.join(__dirname, "product-images");
 
@@ -110,26 +108,7 @@ async function makeFeedsForSession(session, imageBuffer, size = 224) {
   return feeds;
 }
 
-function localPathForRemoteUrl(remoteUrl) {
-  try {
-    const parsed = new URL(remoteUrl);
-    const pathname = parsed.pathname || "";
-    const parts = pathname.split("/").filter(Boolean);
-    const basename = parts.pop() || "image";
-    const parent = parts.length > 0 ? parts[parts.length - 1] : "remote";
-    const localDir = path.join(CACHE_ROOT, parent);
-    if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
-    return path.join(localDir, basename);
-  } catch (e) {
-    const fallbackDir = path.join(CACHE_ROOT, "remote");
-    if (!fs.existsSync(fallbackDir))
-      fs.mkdirSync(fallbackDir, { recursive: true });
-    const fallbackName = `img_${Date.now()}.jpg`;
-    return path.join(fallbackDir, fallbackName);
-  }
-}
-
-async function getBufferFromPathOrBuffer(maybePathOrBuffer, resellid) {
+async function getBufferFromPathOrBuffer(maybePathOrBuffer) {
   if (Buffer.isBuffer(maybePathOrBuffer)) return maybePathOrBuffer;
 
   if (typeof maybePathOrBuffer !== "string")
@@ -137,56 +116,8 @@ async function getBufferFromPathOrBuffer(maybePathOrBuffer, resellid) {
 
   const str = maybePathOrBuffer.trim();
 
-  if (/^https?:\/\//i.test(str)) {
-    const localPath = localPathForRemoteUrl(str);
-    if (fs.existsSync(localPath)) {
-      return fs.readFileSync(localPath);
-    }
-    try {
-      const resp = await axios.get(str, {
-        responseType: "arraybuffer",
-        timeout: 20000,
-      });
-      const buf = Buffer.from(resp.data);
-      try {
-        fs.writeFileSync(localPath, buf);
-      } catch (e) {}
-      return buf;
-    } catch (err) {
-      throw new Error(`Failed to download remote image ${str}: ${err.message}`);
-    }
-  }
-
-  if (fs.existsSync(str)) {
-    return fs.readFileSync(str);
-  }
-  const alt = path.join(__dirname, str);
+  const alt = CACHE_ROOT + "/" + str;
   if (fs.existsSync(alt)) return fs.readFileSync(alt);
-
-  const BASE_IMG_URL =
-    "https://clavstoreimages.etnants.com/dedicated/package_images/package" +
-    resellid +
-    "/";
-  const fileName = path.basename(str);
-  const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
-  const localPath = localPathForRemoteUrl(remoteUrl);
-  if (fs.existsSync(localPath)) return fs.readFileSync(localPath);
-
-  try {
-    const resp = await axios.get(remoteUrl, {
-      responseType: "arraybuffer",
-      timeout: 20000,
-    });
-    const buf = Buffer.from(resp.data);
-    try {
-      fs.writeFileSync(localPath, buf);
-    } catch (e) {}
-    return buf;
-  } catch (err) {
-    throw new Error(
-      `Failed to fetch remote image ${remoteUrl}: ${err.message}`
-    );
-  }
 }
 
 module.exports = { makeFeedsForSession, getBufferFromPathOrBuffer };

@@ -154,7 +154,7 @@ productSchema.index(
   }
 );
 
-const ProductResell = (estoreid) =>
+const Product = (estoreid) =>
   conn[estoreid].model("GratisProduct", productSchema);
 
-module.exports = ProductResell;
+module.exports = Product;

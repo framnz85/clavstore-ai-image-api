@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const { readdirSync } = require("fs");
 require("dotenv").config();
@@ -17,6 +18,16 @@ app.use(cors());
 
 readdirSync("./routes").map((file) =>
   app.use("/" + process.env.API_ROUTES, require("./routes/" + file))
+);
+
+app.use(
+  "/images",
+  express.static(path.join(__dirname, "controllers", "product-images"))
+);
+
+app.use(
+  "/images/defaults",
+  express.static(path.join(__dirname, "controllers", "static"))
 );
 
 const port = process.env.PORT || 8000;

@@ -1,10 +1,10 @@
 const ObjectId = require("mongoose").Types.ObjectId;
-const Product = require("../models/productresell");
+const Product = require("../models/product");
 const fs = require("fs");
 const path = require("path");
 const ort = require("onnxruntime-node");
 const HNSWLib = require("hnswlib-node");
-const Estore = require("../models/estoreresell");
+const Estore = require("../models/estore");
 const {
   makeFeedsForSession,
   getBufferFromPathOrBuffer,
@@ -13,8 +13,8 @@ const {
 const MODEL_PATH = path.join(__dirname, "models", "clip_image.onnx");
 const FILE_PATH = path.join(__dirname, "estoreids.json");
 
-async function embedImage(bufferOrPath, session, resellid) {
-  const buffer = await getBufferFromPathOrBuffer(bufferOrPath, resellid);
+async function embedImage(bufferOrPath, session) {
+  const buffer = await getBufferFromPathOrBuffer(bufferOrPath);
   const feeds = await makeFeedsForSession(session, buffer, 224);
   const outputs = await session.run(feeds);
 
@@ -83,7 +83,6 @@ exports.buildIndex = async (req, res) => {
     "vectors",
     "vectors" + estoreid + ".bin"
   );
-  const IMG_URL = path.join(__dirname, "product-images", "package" + estoreid);
 
   try {
     if (fs.existsSync(dbPath)) {
@@ -92,13 +91,6 @@ exports.buildIndex = async (req, res) => {
 
     if (fs.existsSync(OUT_INDEX)) {
       fs.unlinkSync(OUT_INDEX);
-    }
-
-    if (fs.existsSync(IMG_URL)) {
-      fs.rmSync(IMG_URL, {
-        recursive: true,
-        force: true,
-      });
     }
 
     await Estore(resellid).findOneAndUpdate(
@@ -127,7 +119,14 @@ exports.buildIndex = async (req, res) => {
     const db = products.map((product, index) => ({
       id: product._id,
       title: product.title,
-      image: "package" + estoreid + "/" + product.images[0].url,
+      image:
+        "package" +
+        resellid +
+        "/" +
+        "estore" +
+        estoreid +
+        "/products/" +
+        product.images[0].url,
       vectorIndex: index,
     }));
 
@@ -149,7 +148,7 @@ exports.buildIndex = async (req, res) => {
     for (let i = 0; i < db.length; i++) {
       const product = db[i];
       try {
-        const vecF32 = await embedImage(product.image, session, resellid);
+        const vecF32 = await embedImage(product.image, session);
         const plain = Array.from(vecF32);
         vectors.push(plain);
         validProductIndices.push(i);
@@ -160,9 +159,9 @@ exports.buildIndex = async (req, res) => {
     }
 
     if (vectors.length === 0) {
-      return res.status(500).json({
+      return res.json({
         ok: false,
-        error: "No valid images found to build index",
+        err: "No valid images found to build index",
         skipped,
       });
     }
