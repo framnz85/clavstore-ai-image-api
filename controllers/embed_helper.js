@@ -4,8 +4,22 @@ const fs = require("fs");
 const path = require("path");
 
 const CACHE_ROOT = path.join(__dirname, "product-images");
+const SOURCE_DIR = path.join(__dirname, "static");
+const DEST_DIR = path.join(__dirname, "product-images", "static");
 
-if (!fs.existsSync(CACHE_ROOT)) fs.mkdirSync(CACHE_ROOT, { recursive: true });
+(async () => {
+  try {
+    if (!fs.existsSync(CACHE_ROOT))
+      fs.mkdirSync(CACHE_ROOT, { recursive: true });
+    if (fs.existsSync(DEST_DIR)) {
+      fs.rmSync(DEST_DIR, { recursive: true, force: true });
+      fs.mkdirSync(DEST_DIR, { recursive: true });
+    } else {
+      fs.mkdirSync(DEST_DIR, { recursive: true });
+    }
+    fs.cpSync(SOURCE_DIR, DEST_DIR, { recursive: true });
+  } catch (e) {}
+})();
 
 async function imageBufferToTensor(buffer, size = 224) {
   const { data, info } = await sharp(buffer)

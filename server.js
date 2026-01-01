@@ -27,7 +27,9 @@ app.use(
 
 app.use(
   "/images/defaults",
-  express.static(path.join(__dirname, "controllers", "static"))
+  express.static(
+    path.join(__dirname, "controllers", "product-images", "static")
+  )
 );
 
 const port = process.env.PORT || 8000;

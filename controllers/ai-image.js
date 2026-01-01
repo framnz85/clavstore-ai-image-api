@@ -54,17 +54,6 @@ async function ensureOnnxModel() {
   fs.writeFileSync(MODEL_PATH, Buffer.from(response.data));
 }
 
-(async () => {
-  try {
-    await ensureOnnxModel();
-    session = await ort.InferenceSession.create(MODEL_PATH, {
-      executionProviders: ["cpu"],
-    });
-  } catch (err) {
-    process.exit(1);
-  }
-})();
-
 const loadInitials = async (estoreid) => {
   index[estoreid] = null;
   indexMaxElements[estoreid] = 0;
@@ -100,6 +89,10 @@ const loadInitials = async (estoreid) => {
 
 (async () => {
   try {
+    await ensureOnnxModel();
+    session = await ort.InferenceSession.create(MODEL_PATH, {
+      executionProviders: ["cpu"],
+    });
     const estoreids = JSON.parse(fs.readFileSync(ESTOREIDS_PATH, "utf8"));
     for (const estoreid of estoreids) {
       await loadInitials(estoreid);

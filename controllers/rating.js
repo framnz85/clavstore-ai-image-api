@@ -35,7 +35,7 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
     "product-images",
     "package" + resellid,
     "estore" + estoreid,
-    "payments"
+    "ratings"
   );
   await fs.mkdir(uploadsDir, { recursive: true });
 
@@ -58,7 +58,7 @@ async function deleteImage(public_id, estoreid, resellid) {
     "product-images",
     "package" + String(resellid),
     "estore" + String(estoreid),
-    "payments"
+    "users"
   );
 
   try {

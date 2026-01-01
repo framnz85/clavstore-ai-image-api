@@ -2,11 +2,10 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const Estore = require("../models/estore");
 const Product = require("../models/product");
-
-const CACHE_ROOT = path.join(__dirname, "product-images");
-
-if (!fs.existsSync(CACHE_ROOT)) fs.mkdirSync(CACHE_ROOT, { recursive: true });
+const Category = require("../models/category");
+const Brand = require("../models/brand");
 
 async function getBufferFromOldPath(
   maybePathOrBuffer,
@@ -26,11 +25,12 @@ async function getBufferFromOldPath(
     "product-images",
     "package" + resellid,
     "estore" + estoreid,
-    typePath,
-    str
+    typePath
   );
 
-  if (!fs.existsSync(alt)) {
+  if (!fs.existsSync(alt)) fs.mkdirSync(alt, { recursive: true });
+
+  if (!fs.existsSync(alt + "/" + str)) {
     const BASE_IMG_URL =
       process.env.CLAVMALL_IMAGE_SERVER +
       "/dedicated/package_images/package" +
@@ -46,20 +46,34 @@ async function getBufferFromOldPath(
       });
       const buf = Buffer.from(resp.data);
       try {
-        fs.writeFileSync(alt, buf);
+        fs.writeFileSync(alt + "/" + str, buf);
       } catch (e) {}
       return buf;
-    } catch (err) {
-      throw new Error(
-        `Failed to fetch remote image ${remoteUrl}: ${err.message}`
-      );
-    }
+    } catch (e) {}
   }
 }
 
 exports.migrateImage = async (req, res) => {
   const estoreid = req.body.estoreid;
   const resellid = req.body.resellid;
+
+  const estores = await Estore(resellid).findOne({
+    _id: new ObjectId(estoreid),
+    "images.0": { $exists: true },
+  });
+
+  if (estores && estores.logo && estores.logo.public_id) {
+    await getBufferFromOldPath(
+      estores.logo.url,
+      resellid,
+      estoreid,
+      "settings"
+    );
+  }
+
+  for (const image of estores.images) {
+    await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
+  }
 
   const products = await Product(resellid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
@@ -69,6 +83,28 @@ exports.migrateImage = async (req, res) => {
   for (const product of products) {
     for (const image of product.images) {
       await getBufferFromOldPath(image.url, resellid, estoreid, "products");
+    }
+  }
+
+  const categories = await Category(resellid)
+    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .select("_id images")
+    .exec();
+
+  for (const category of categories) {
+    for (const image of category.images) {
+      await getBufferFromOldPath(image.url, resellid, estoreid, "categories");
+    }
+  }
+
+  const brands = await Brand(resellid)
+    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .select("_id images")
+    .exec();
+
+  for (const brand of brands) {
+    for (const image of brand.images) {
+      await getBufferFromOldPath(image.url, resellid, estoreid, "brands");
     }
   }
 

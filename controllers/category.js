@@ -63,47 +63,22 @@ async function deleteImage(public_id, estoreid, resellid) {
 
   try {
     const stat = await fs.stat(uploadsDir);
-    if (!stat.isDirectory()) throw new Error("Uploads path is not a directory");
+    if (!stat.isDirectory())
+      return { err: "Uploads path is not a directory", noexist: true };
   } catch (err) {
-    return { err: "Uploads directory not found" };
+    return { err: "Uploads directory not found", noexist: true };
   }
 
   const files = await fs.readdir(uploadsDir);
   const matches = files.filter((f) => f.includes(public_id));
 
-  const thumbDirs = [
-    path.join(uploadsDir, "thumb"),
-    path.join(path.dirname(uploadsDir), "thumb"),
-  ];
-
-  let thumbMatches = [];
-  for (const td of thumbDirs) {
-    try {
-      const tdStat = await fs.stat(td);
-      if (tdStat.isDirectory()) {
-        const tfiles = await fs.readdir(td);
-        thumbMatches = thumbMatches.concat(
-          tfiles
-            .filter((f) => f.includes(public_id))
-            .map((f) => ({ dir: td, name: f }))
-        );
-      }
-    } catch (e) {}
-  }
-
-  if (matches.length === 0 && thumbMatches.length === 0) {
-    return { ok: true };
+  if (matches.length) {
+    return { err: "Image does not exist", noexist: true };
   } else {
     const deleted = [];
 
     for (const file of matches) {
       const p = path.join(uploadsDir, file);
-      await fs.unlink(p);
-      deleted.push(p);
-    }
-
-    for (const t of thumbMatches) {
-      const p = path.join(t.dir, t.name);
       await fs.unlink(p);
       deleted.push(p);
     }
