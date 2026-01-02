@@ -159,14 +159,14 @@ const migrateExecute = async (resellid, estoreid) => {
   }
 
   const packages = await Package(resellid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .find({ "images.0": { $exists: true } })
     .select("_id images")
     .exec();
 
   for (const package of packages) {
     if (package && package.images && package.images.length > 0) {
       for (const image of package.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "packages");
+        await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
       }
     }
   }
