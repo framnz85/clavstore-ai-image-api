@@ -7,6 +7,8 @@ const Product = require("../models/product");
 const Category = require("../models/category");
 const Brand = require("../models/brand");
 const Rating = require("../models/rating");
+const Payment = require("../models/payment");
+const User = require("../models/user");
 
 async function getBufferFromOldPath(
   maybePathOrBuffer,
@@ -123,6 +125,30 @@ const migrateExecute = async (resellid, estoreid) => {
       for (const image of rating.images) {
         await getBufferFromOldPath(image.url, resellid, estoreid, "ratings");
       }
+    }
+  }
+
+  const payments = await Payment(resellid)
+    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .select("_id images")
+    .exec();
+
+  for (const payment of payments) {
+    if (payment && payment.images && payment.images.length > 0) {
+      for (const image of payment.images) {
+        await getBufferFromOldPath(image.url, resellid, estoreid, "payments");
+      }
+    }
+  }
+
+  const users = await Payment(resellid)
+    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .select("_id images")
+    .exec();
+
+  for (const user of users) {
+    if (user && user.image && user.image.public_id) {
+      await getBufferFromOldPath(user.image.url, resellid, estoreid, "users");
     }
   }
 };
