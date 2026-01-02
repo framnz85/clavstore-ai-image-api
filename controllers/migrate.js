@@ -191,3 +191,12 @@ exports.migrateImage = async (req, res) => {
 
   res.json({ ok: true, skipTo, total: estoreCount });
 };
+
+exports.migrateImageByStore = async (req, res) => {
+  const resellid = req.body.resellid;
+  const estoreid = req.body.estoreid;
+
+  await migrateExecute(resellid, estoreid);
+
+  res.json({ ok: true });
+};
