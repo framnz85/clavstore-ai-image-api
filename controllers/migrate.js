@@ -34,10 +34,15 @@ async function getBufferFromOldPath(
 
     if (!fs.existsSync(alt + "/" + str)) {
       const BASE_IMG_URL =
-        process.env.CLAVMALL_IMAGE_SERVER +
-        "/dedicated/package_images/package" +
-        resellid +
-        "/";
+        typePath === "ratings"
+          ? process.env.CLAVMALL_IMAGE_SERVER +
+            "/dedicated/package_images/package" +
+            resellid +
+            "/ratings/"
+          : process.env.CLAVMALL_IMAGE_SERVER +
+            "/dedicated/package_images/package" +
+            resellid +
+            "/";
       const fileName = path.basename(str);
       const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
 
