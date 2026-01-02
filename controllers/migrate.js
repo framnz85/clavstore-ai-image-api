@@ -6,6 +6,7 @@ const Estore = require("../models/estore");
 const Product = require("../models/product");
 const Category = require("../models/category");
 const Brand = require("../models/brand");
+const Rating = require("../models/rating");
 
 async function getBufferFromOldPath(
   maybePathOrBuffer,
@@ -15,48 +16,44 @@ async function getBufferFromOldPath(
 ) {
   if (Buffer.isBuffer(maybePathOrBuffer)) return maybePathOrBuffer;
 
-  if (typeof maybePathOrBuffer !== "string")
-    throw new Error("image must be a Buffer or path string");
+  if (typeof maybePathOrBuffer === "string") {
+    const str = maybePathOrBuffer.trim();
 
-  const str = maybePathOrBuffer.trim();
+    const alt = path.join(
+      __dirname,
+      "product-images",
+      "package" + resellid,
+      "estore" + estoreid,
+      typePath
+    );
 
-  const alt = path.join(
-    __dirname,
-    "product-images",
-    "package" + resellid,
-    "estore" + estoreid,
-    typePath
-  );
+    if (!fs.existsSync(alt)) fs.mkdirSync(alt, { recursive: true });
 
-  if (!fs.existsSync(alt)) fs.mkdirSync(alt, { recursive: true });
+    if (!fs.existsSync(alt + "/" + str)) {
+      const BASE_IMG_URL =
+        process.env.CLAVMALL_IMAGE_SERVER +
+        "/dedicated/package_images/package" +
+        resellid +
+        "/";
+      const fileName = path.basename(str);
+      const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
 
-  if (!fs.existsSync(alt + "/" + str)) {
-    const BASE_IMG_URL =
-      process.env.CLAVMALL_IMAGE_SERVER +
-      "/dedicated/package_images/package" +
-      resellid +
-      "/";
-    const fileName = path.basename(str);
-    const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
-
-    try {
-      const resp = await axios.get(remoteUrl, {
-        responseType: "arraybuffer",
-        timeout: 20000,
-      });
-      const buf = Buffer.from(resp.data);
       try {
-        fs.writeFileSync(alt + "/" + str, buf);
+        const resp = await axios.get(remoteUrl, {
+          responseType: "arraybuffer",
+          timeout: 20000,
+        });
+        const buf = Buffer.from(resp.data);
+        try {
+          fs.writeFileSync(alt + "/" + str, buf);
+        } catch (e) {}
+        return buf;
       } catch (e) {}
-      return buf;
-    } catch (e) {}
+    }
   }
 }
 
-exports.migrateImage = async (req, res) => {
-  const estoreid = req.body.estoreid;
-  const resellid = req.body.resellid;
-
+const migrateExecute = async (resellid, estoreid) => {
   const estores = await Estore(resellid).findOne({
     _id: new ObjectId(estoreid),
     "images.0": { $exists: true },
@@ -71,8 +68,10 @@ exports.migrateImage = async (req, res) => {
     );
   }
 
-  for (const image of estores.images) {
-    await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
+  if (estores && estores.images && estores.images.length > 0) {
+    for (const image of estores.images) {
+      await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
+    }
   }
 
   const products = await Product(resellid)
@@ -81,8 +80,10 @@ exports.migrateImage = async (req, res) => {
     .exec();
 
   for (const product of products) {
-    for (const image of product.images) {
-      await getBufferFromOldPath(image.url, resellid, estoreid, "products");
+    if (product && product.images && product.images.length > 0) {
+      for (const image of product.images) {
+        await getBufferFromOldPath(image.url, resellid, estoreid, "products");
+      }
     }
   }
 
@@ -92,8 +93,10 @@ exports.migrateImage = async (req, res) => {
     .exec();
 
   for (const category of categories) {
-    for (const image of category.images) {
-      await getBufferFromOldPath(image.url, resellid, estoreid, "categories");
+    if (category && category.images && category.images.length > 0) {
+      for (const image of category.images) {
+        await getBufferFromOldPath(image.url, resellid, estoreid, "categories");
+      }
     }
   }
 
@@ -103,10 +106,48 @@ exports.migrateImage = async (req, res) => {
     .exec();
 
   for (const brand of brands) {
-    for (const image of brand.images) {
-      await getBufferFromOldPath(image.url, resellid, estoreid, "brands");
+    if (brand && brand.images && brand.images.length > 0) {
+      for (const image of brand.images) {
+        await getBufferFromOldPath(image.url, resellid, estoreid, "brands");
+      }
     }
   }
 
-  res.json({ ok: true });
+  const ratings = await Rating(resellid)
+    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+    .select("_id images")
+    .exec();
+
+  for (const rating of ratings) {
+    if (rating && rating.images && rating.images.length > 0) {
+      for (const image of rating.images) {
+        await getBufferFromOldPath(image.url, resellid, estoreid, "ratings");
+      }
+    }
+  }
+};
+
+exports.migrateImage = async (req, res) => {
+  const resellid = req.body.resellid;
+  const skipTo = req.body.skipTo;
+  const maxCount = req.body.maxCount;
+
+  const estores = await Estore(resellid)
+    .find({
+      upgradeType: "1",
+      upStatus: "Active",
+    })
+    .skip(skipTo)
+    .limit(maxCount);
+
+  for (const estore of estores) {
+    await migrateExecute(resellid, estore._id);
+  }
+
+  const estoreCount = await Estore(resellid).countDocuments({
+    upgradeType: "1",
+    upStatus: "Active",
+  });
+
+  res.json({ ok: true, skipTo, total: estoreCount });
 };

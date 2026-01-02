@@ -26,7 +26,7 @@ app.use(
 );
 
 app.use(
-  "/images/defaults",
+  "/images/static",
   express.static(
     path.join(__dirname, "controllers", "product-images", "static")
   )
