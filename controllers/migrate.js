@@ -62,31 +62,26 @@ async function getBufferFromOldPath(
 }
 
 const migrateExecute = async (resellid, estoreid) => {
-  const estores = await Estore(resellid).findOne({
+  const estore = await Estore(resellid).findOne({
     _id: new ObjectId(estoreid),
     "images.0": { $exists: true },
   });
 
-  if (estores && estores.logo && estores.logo.public_id) {
+  if (estore && estore.logo && estore.logo.public_id) {
+    await getBufferFromOldPath(estore.logo.url, resellid, estoreid, "settings");
+  }
+
+  if (estore && estore.image && estore.image.public_id) {
     await getBufferFromOldPath(
-      estores.logo.url,
+      estore.image.url,
       resellid,
       estoreid,
       "settings"
     );
   }
 
-  if (estores && estores.image && estores.image.public_id) {
-    await getBufferFromOldPath(
-      estores.image.url,
-      resellid,
-      estoreid,
-      "settings"
-    );
-  }
-
-  if (estores && estores.images && estores.images.length > 0) {
-    for (const image of estores.images) {
+  if (estore && estore.images && estore.images.length > 0) {
+    for (const image of estore.images) {
       await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
     }
   }
