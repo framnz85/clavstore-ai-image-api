@@ -76,6 +76,15 @@ const migrateExecute = async (resellid, estoreid) => {
     );
   }
 
+  if (estores && estores.image && estores.image.public_id) {
+    await getBufferFromOldPath(
+      estores.image.url,
+      resellid,
+      estoreid,
+      "settings"
+    );
+  }
+
   if (estores && estores.images && estores.images.length > 0) {
     for (const image of estores.images) {
       await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
