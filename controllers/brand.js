@@ -30,13 +30,13 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
 
   const filename = `image${uniqueId}.jpg`;
 
-  const uploadsDir = path.resolve(
-    __dirname,
-    "product-images",
-    "package" + resellid,
-    "estore" + estoreid,
-    "brands"
-  );
+  const baseDir = path.resolve(__dirname, "product-images");
+  await fs.mkdir(baseDir, { recursive: true });
+  const packageDir = path.join(baseDir, `package${resellid}`);
+  await fs.mkdir(packageDir, { recursive: true });
+  const estoreDir = path.join(packageDir, `estore${estoreid}`);
+  await fs.mkdir(estoreDir, { recursive: true });
+  const uploadsDir = path.join(estoreDir, "brands");
   await fs.mkdir(uploadsDir, { recursive: true });
 
   const filePath = path.join(uploadsDir, filename);
@@ -70,9 +70,9 @@ async function deleteImage(public_id, estoreid, resellid) {
   }
 
   const files = await fs.readdir(uploadsDir);
-  const matches = files.filter((f) => f.includes(public_id));
+  const matches = files.filter((f) => f.includes("image" + public_id + ".jpg"));
 
-  if (matches.length) {
+  if (matches.length === 0) {
     return { err: "Image does not exist", noexist: true };
   } else {
     const deleted = [];

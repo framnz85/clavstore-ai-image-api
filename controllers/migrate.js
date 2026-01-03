@@ -11,6 +11,45 @@ const Payment = require("../models/payment");
 const User = require("../models/user");
 const Package = require("../models/package");
 
+async function creatingFolders(resellid, estoreid) {
+  const baseDir = path.resolve(__dirname, "product-images");
+  const packageDir = path.join(baseDir, `package${resellid}`);
+  const estoreDir = path.join(packageDir, `estore${estoreid}`);
+  let typePathDir = "";
+
+  if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+  if (!fs.existsSync(packageDir)) fs.mkdirSync(packageDir, { recursive: true });
+  if (!fs.existsSync(estoreDir)) fs.mkdirSync(estoreDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "products");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "ratings");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "settings");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "users");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "brands");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "categories");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+
+  typePathDir = path.join(estoreDir, "payments");
+  if (!fs.existsSync(typePathDir))
+    fs.mkdirSync(typePathDir, { recursive: true });
+}
+
 async function getBufferFromOldPath(
   maybePathOrBuffer,
   resellid,
@@ -22,17 +61,19 @@ async function getBufferFromOldPath(
   if (typeof maybePathOrBuffer === "string") {
     const str = maybePathOrBuffer.trim();
 
-    const alt = path.join(
-      __dirname,
-      "product-images",
-      "package" + resellid,
-      "estore" + estoreid,
-      typePath
-    );
+    const baseDir = path.resolve(__dirname, "product-images");
+    const packageDir = path.join(baseDir, `package${resellid}`);
+    const estoreDir = path.join(packageDir, `estore${estoreid}`);
+    const typePathDir = path.join(estoreDir, typePath);
 
-    if (!fs.existsSync(alt)) fs.mkdirSync(alt, { recursive: true });
+    if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+    if (!fs.existsSync(packageDir))
+      fs.mkdirSync(packageDir, { recursive: true });
+    if (!fs.existsSync(estoreDir)) fs.mkdirSync(estoreDir, { recursive: true });
+    if (!fs.existsSync(typePathDir))
+      fs.mkdirSync(typePathDir, { recursive: true });
 
-    if (!fs.existsSync(alt + "/" + str)) {
+    if (!fs.existsSync(typePathDir + "/" + str)) {
       const BASE_IMG_URL =
         typePath === "ratings"
           ? process.env.CLAVMALL_IMAGE_SERVER +
@@ -53,7 +94,7 @@ async function getBufferFromOldPath(
         });
         const buf = Buffer.from(resp.data);
         try {
-          fs.writeFileSync(alt + "/" + str, buf);
+          fs.writeFileSync(typePathDir + "/" + str, buf);
         } catch (e) {}
         return buf;
       } catch (e) {}
@@ -183,19 +224,24 @@ exports.migrateImage = async (req, res) => {
 
   const estores = await Estore(resellid)
     .find({
-      upgradeType: "1",
-      upStatus: "Active",
+      $or: [
+        { upgradeType: "1", upStatus: "Active" },
+        { upgradeType: "2", upStatus2: "Active" },
+      ],
     })
     .skip(skipTo)
     .limit(maxCount);
 
   for (const estore of estores) {
+    await creatingFolders(resellid, estore._id);
     await migrateExecute(resellid, estore._id);
   }
 
   const estoreCount = await Estore(resellid).countDocuments({
-    upgradeType: "1",
-    upStatus: "Active",
+    $or: [
+      { upgradeType: "1", upStatus: "Active" },
+      { upgradeType: "2", upStatus2: "Active" },
+    ],
   });
 
   res.json({ ok: true, skipTo, total: estoreCount });
@@ -205,6 +251,7 @@ exports.migrateImageByStore = async (req, res) => {
   const resellid = req.body.resellid;
   const estoreid = req.body.estoreid;
 
+  await creatingFolders(resellid, estoreid);
   await migrateExecute(resellid, estoreid);
 
   res.json({ ok: true });
