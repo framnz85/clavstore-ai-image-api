@@ -30,13 +30,13 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
 
   const filename = `image${uniqueId}.jpg`;
 
-  const baseDir = path.resolve(__dirname, "product-images");
-  await fs.mkdir(baseDir, { recursive: true });
-  const packageDir = path.join(baseDir, `package${resellid}`);
-  await fs.mkdir(packageDir, { recursive: true });
-  const estoreDir = path.join(packageDir, `estore${estoreid}`);
-  await fs.mkdir(estoreDir, { recursive: true });
-  const uploadsDir = path.join(estoreDir, "categories");
+  const uploadsDir = path.resolve(
+    __dirname,
+    "product-images",
+    "package" + resellid,
+    "estore" + estoreid,
+    "categories"
+  );
   await fs.mkdir(uploadsDir, { recursive: true });
 
   const filePath = path.join(uploadsDir, filename);

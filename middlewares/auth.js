@@ -16,9 +16,10 @@ exports.authCheck = async (req, res, next) => {
 
 exports.adminGratisCheck = async (req, res, next) => {
   const { email } = req.user;
+  const resellid = req.headers.resellid;
   const estoreid = req.headers.estoreid;
 
-  const adminUser = await User(estoreid)
+  const adminUser = await User(resellid)
     .findOne({
       email,
       estoreid: new ObjectId(estoreid),
