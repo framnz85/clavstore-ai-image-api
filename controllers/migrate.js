@@ -61,17 +61,13 @@ async function getBufferFromOldPath(
   if (typeof maybePathOrBuffer === "string") {
     const str = maybePathOrBuffer.trim();
 
-    const baseDir = path.resolve(__dirname, "product-images");
-    const packageDir = path.join(baseDir, `package${resellid}`);
-    const estoreDir = path.join(packageDir, `estore${estoreid}`);
-    const typePathDir = path.join(estoreDir, typePath);
-
-    if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
-    if (!fs.existsSync(packageDir))
-      fs.mkdirSync(packageDir, { recursive: true });
-    if (!fs.existsSync(estoreDir)) fs.mkdirSync(estoreDir, { recursive: true });
-    if (!fs.existsSync(typePathDir))
-      fs.mkdirSync(typePathDir, { recursive: true });
+    const typePathDir = path.join(
+      __dirname,
+      "product-images",
+      `package${resellid}`,
+      `estore${estoreid}`,
+      typePath
+    );
 
     if (!fs.existsSync(typePathDir + "/" + str)) {
       const BASE_IMG_URL =
