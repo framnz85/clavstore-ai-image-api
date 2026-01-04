@@ -101,7 +101,6 @@ async function getBufferFromOldPath(
 const migrateExecute = async (resellid, estoreid) => {
   const estore = await Estore(resellid).findOne({
     _id: new ObjectId(estoreid),
-    "images.0": { $exists: true },
   });
 
   if (estore && estore.logo && estore.logo.public_id) {
