@@ -1,28 +1,24 @@
 const fs = require("fs").promises;
 const path = require("path");
 const crypto = require("crypto");
+const sharp = require("sharp");
 
 async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
-  if (!imageString)
-    throw new Error("No image provided in request body (req.body.image)");
-
-  // Support data URLs: data:<mime>;base64,<data>
-  const dataUriMatch =
-    /^data:(image\/[a-zA-Z0-9.+-]+);base64,([0-9A-Za-z+/=]+)$/.exec(
-      imageString
-    );
-  let mime = null;
-  let base64 = imageString;
-
-  if (dataUriMatch) {
-    mime = dataUriMatch[1];
-    base64 = dataUriMatch[2];
+  if (!imageString) {
+    throw new Error("No image provided in request body");
   }
 
-  const buffer = Buffer.from(base64, "base64");
+  const dataUriMatch = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(
+    imageString
+  );
 
-  const MAX_BYTES = options.maxBytes || 5 * 1024 * 1024; // 5MB default
-  if (buffer.length > MAX_BYTES) throw new Error("Image too large");
+  const base64 = dataUriMatch ? dataUriMatch[2] : imageString;
+  const inputBuffer = Buffer.from(base64, "base64");
+
+  const MAX_BYTES = options.maxBytes || 5 * 1024 * 1024;
+  if (inputBuffer.length > MAX_BYTES) {
+    throw new Error("Image too large");
+  }
 
   const uniqueId = `${crypto.randomBytes(12).toString("hex")}.${Math.floor(
     Date.now() / 1000
@@ -37,10 +33,23 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
     "estore" + estoreid,
     "brands"
   );
+
   await fs.mkdir(uploadsDir, { recursive: true });
 
   const filePath = path.join(uploadsDir, filename);
-  await fs.writeFile(filePath, buffer);
+
+  await sharp(inputBuffer)
+    .rotate()
+    .resize({
+      width: options.maxWidth || 1024,
+      withoutEnlargement: true,
+    })
+    .jpeg({
+      quality: options.quality || 70,
+      chromaSubsampling: "4:2:0",
+      mozjpeg: true,
+    })
+    .toFile(filePath);
 
   return {
     public_id: uniqueId,
