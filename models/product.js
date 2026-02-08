@@ -124,6 +124,7 @@ const productSchema = new mongoose.Schema(
     },
     prod_code: ObjectId,
     waiting: Object,
+    vatPercent: { type: Number, default: 12 },
     vatExempt: Number,
     vatExemptType: {
       type: String,
@@ -140,7 +141,7 @@ const productSchema = new mongoose.Schema(
     expiration: Date,
     showToUsersOnly: Boolean,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 productSchema.index(
@@ -151,7 +152,7 @@ productSchema.index(
       description: 3,
       slug: 1,
     },
-  }
+  },
 );
 
 const Product = (estoreid) =>
