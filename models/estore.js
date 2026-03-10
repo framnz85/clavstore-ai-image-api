@@ -25,7 +25,6 @@ const estoreSchema = new mongoose.Schema(
       type: String,
       unique: true,
       lowercase: true,
-      index: true,
     },
     status: {
       type: String,
@@ -242,6 +241,7 @@ const estoreSchema = new mongoose.Schema(
     resellid: ObjectId,
     showInApp: { type: Boolean, default: false },
     showInList: { type: Boolean, default: false },
+    hideToCustomers: { type: Boolean, default: false },
     webHomepage: {
       type: String,
       enum: ["Home", "Stores", "Random"],
@@ -292,6 +292,7 @@ const estoreSchema = new mongoose.Schema(
           "location",
           "product",
           "products",
+          "jobs",
           "sales",
           "inventory",
           "users",
@@ -322,6 +323,7 @@ const estoreSchema = new mongoose.Schema(
           "location",
           "product",
           "products",
+          "jobs",
           "sales",
           "inventory",
           "users",
@@ -432,6 +434,7 @@ const estoreSchema = new mongoose.Schema(
     domain: String,
     subdomain: String,
     indexing: { type: Boolean, default: false },
+    branchStore: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
