@@ -19,6 +19,7 @@ const estoreid2 = [
   "686623867ec6ae28ef6f5b98",
   "68f5291d80f12838274f79f7",
   "69081136afaed8cee0961838",
+  "67318c80fc9b3d9326c1805d",
 ];
 
 const estoreid3 = ["68674af77ec6ae28ef74cf67"];

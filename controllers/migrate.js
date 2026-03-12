@@ -54,7 +54,7 @@ async function getBufferFromOldPath(
   maybePathOrBuffer,
   resellid,
   estoreid,
-  typePath
+  typePath,
 ) {
   if (Buffer.isBuffer(maybePathOrBuffer)) return maybePathOrBuffer;
 
@@ -66,7 +66,7 @@ async function getBufferFromOldPath(
       "product-images",
       `package${resellid}`,
       `estore${estoreid}`,
-      typePath
+      typePath,
     );
 
     if (!fs.existsSync(typePathDir + "/" + str)) {
@@ -79,7 +79,7 @@ async function getBufferFromOldPath(
           : process.env.CLAVMALL_IMAGE_SERVER +
             "/dedicated/package_images/package" +
             resellid +
-            "/";
+            "/thumb/";
       const fileName = path.basename(str);
       const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
 
@@ -99,43 +99,43 @@ async function getBufferFromOldPath(
 }
 
 const migrateExecute = async (resellid, estoreid) => {
-  const estore = await Estore(resellid).findOne({
-    _id: new ObjectId(estoreid),
-  });
+  // const estore = await Estore(estoreid).findOne({
+  //   _id: new ObjectId(estoreid),
+  // });
 
-  if (estore && estore.logo && estore.logo.public_id) {
-    await getBufferFromOldPath(estore.logo.url, resellid, estoreid, "settings");
-  }
+  // if (estore && estore.logo && estore.logo.public_id) {
+  //   await getBufferFromOldPath(estore.logo.url, resellid, estoreid, "settings");
+  // }
 
-  if (estore && estore.image && estore.image.public_id) {
-    await getBufferFromOldPath(
-      estore.image.url,
-      resellid,
-      estoreid,
-      "settings"
-    );
-  }
+  // if (estore && estore.image && estore.image.public_id) {
+  //   await getBufferFromOldPath(
+  //     estore.image.url,
+  //     resellid,
+  //     estoreid,
+  //     "settings",
+  //   );
+  // }
 
-  if (estore && estore.images && estore.images.length > 0) {
-    for (const image of estore.images) {
-      await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
-    }
-  }
+  // if (estore && estore.images && estore.images.length > 0) {
+  //   for (const image of estore.images) {
+  //     await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
+  //   }
+  // }
 
-  const products = await Product(resellid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const products = await Product(estoreid)
+  //   .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const product of products) {
-    if (product && product.images && product.images.length > 0) {
-      for (const image of product.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "products");
-      }
-    }
-  }
+  // for (const product of products) {
+  //   if (product && product.images && product.images.length > 0) {
+  //     for (const image of product.images) {
+  //       await getBufferFromOldPath(image.url, resellid, estoreid, "products");
+  //     }
+  //   }
+  // }
 
-  const categories = await Category(resellid)
+  const categories = await Category(estoreid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
     .select("_id images")
     .exec();
@@ -148,7 +148,7 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const brands = await Brand(resellid)
+  const brands = await Brand(estoreid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
     .select("_id images")
     .exec();
@@ -161,7 +161,7 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const ratings = await Rating(resellid)
+  const ratings = await Rating(estoreid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
     .select("_id images")
     .exec();
@@ -174,7 +174,7 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const payments = await Payment(resellid)
+  const payments = await Payment(estoreid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
     .select("_id images")
     .exec();
@@ -187,7 +187,7 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const users = await User(resellid)
+  const users = await User(estoreid)
     .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
     .select("_id images")
     .exec();
@@ -198,7 +198,7 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const packages = await Package(resellid)
+  const packages = await Package(estoreid)
     .find({ "images.0": { $exists: true } })
     .select("_id images")
     .exec();
