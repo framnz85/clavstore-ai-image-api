@@ -79,7 +79,7 @@ async function getBufferFromOldPath(
           : process.env.CLAVMALL_IMAGE_SERVER +
             "/dedicated/package_images/package" +
             resellid +
-            "/thumb/";
+            "/";
       const fileName = path.basename(str);
       const remoteUrl = new URL(fileName, BASE_IMG_URL).href;
 
@@ -148,68 +148,68 @@ const migrateExecute = async (resellid, estoreid) => {
     }
   }
 
-  const brands = await Brand(estoreid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const brands = await Brand(estoreid)
+  //   .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const brand of brands) {
-    if (brand && brand.images && brand.images.length > 0) {
-      for (const image of brand.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "brands");
-      }
-    }
-  }
+  // for (const brand of brands) {
+  //   if (brand && brand.images && brand.images.length > 0) {
+  //     for (const image of brand.images) {
+  //       await getBufferFromOldPath(image.url, resellid, estoreid, "brands");
+  //     }
+  //   }
+  // }
 
-  const ratings = await Rating(estoreid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const ratings = await Rating(estoreid)
+  //   .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const rating of ratings) {
-    if (rating && rating.images && rating.images.length > 0) {
-      for (const image of rating.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "ratings");
-      }
-    }
-  }
+  // for (const rating of ratings) {
+  //   if (rating && rating.images && rating.images.length > 0) {
+  //     for (const image of rating.images) {
+  //       await getBufferFromOldPath(image.url, resellid, estoreid, "ratings");
+  //     }
+  //   }
+  // }
 
-  const payments = await Payment(estoreid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const payments = await Payment(estoreid)
+  //   .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const payment of payments) {
-    if (payment && payment.images && payment.images.length > 0) {
-      for (const image of payment.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "payments");
-      }
-    }
-  }
+  // for (const payment of payments) {
+  //   if (payment && payment.images && payment.images.length > 0) {
+  //     for (const image of payment.images) {
+  //       await getBufferFromOldPath(image.url, resellid, estoreid, "payments");
+  //     }
+  //   }
+  // }
 
-  const users = await User(estoreid)
-    .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const users = await User(estoreid)
+  //   .find({ estoreid: new ObjectId(estoreid), "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const user of users) {
-    if (user && user.image && user.image.public_id) {
-      await getBufferFromOldPath(user.image.url, resellid, estoreid, "users");
-    }
-  }
+  // for (const user of users) {
+  //   if (user && user.image && user.image.public_id) {
+  //     await getBufferFromOldPath(user.image.url, resellid, estoreid, "users");
+  //   }
+  // }
 
-  const packages = await Package(estoreid)
-    .find({ "images.0": { $exists: true } })
-    .select("_id images")
-    .exec();
+  // const packages = await Package(estoreid)
+  //   .find({ "images.0": { $exists: true } })
+  //   .select("_id images")
+  //   .exec();
 
-  for (const package of packages) {
-    if (package && package.images && package.images.length > 0) {
-      for (const image of package.images) {
-        await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
-      }
-    }
-  }
+  // for (const package of packages) {
+  //   if (package && package.images && package.images.length > 0) {
+  //     for (const image of package.images) {
+  //       await getBufferFromOldPath(image.url, resellid, estoreid, "settings");
+  //     }
+  //   }
+  // }
 };
 
 exports.migrateImage = async (req, res) => {
