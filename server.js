@@ -15,21 +15,22 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(express.json({ limit: "2mb" }));
 app.use(cors());
+app.options("*", cors());
 
 readdirSync("./routes").map((file) =>
-  app.use("/" + process.env.API_ROUTES, require("./routes/" + file))
+  app.use("/" + process.env.API_ROUTES, require("./routes/" + file)),
 );
 
 app.use(
   "/images",
-  express.static(path.join(__dirname, "controllers", "product-images"))
+  express.static(path.join(__dirname, "controllers", "product-images")),
 );
 
 app.use(
   "/images/static",
   express.static(
-    path.join(__dirname, "controllers", "product-images", "static")
-  )
+    path.join(__dirname, "controllers", "product-images", "static"),
+  ),
 );
 
 const port = process.env.PORT || 8000;
