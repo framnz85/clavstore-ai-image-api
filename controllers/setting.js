@@ -9,7 +9,7 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
   }
 
   const dataUriMatch = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(
-    imageString
+    imageString,
   );
 
   const base64 = dataUriMatch ? dataUriMatch[2] : imageString;
@@ -21,7 +21,7 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
   }
 
   const uniqueId = `${crypto.randomBytes(12).toString("hex")}.${Math.floor(
-    Date.now() / 1000
+    Date.now() / 1000,
   )}`;
 
   const filename = `image${uniqueId}.jpg`;
@@ -31,7 +31,7 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
     "product-images",
     "package" + resellid,
     "estore" + estoreid,
-    "settings"
+    "settings",
   );
 
   await fs.mkdir(uploadsDir, { recursive: true });
@@ -41,7 +41,7 @@ async function uploadFromBase64(imageString, estoreid, resellid, options = {}) {
   await sharp(inputBuffer)
     .rotate()
     .resize({
-      width: options.maxWidth || 1024,
+      width: options.maxWidth || 1600,
       withoutEnlargement: true,
     })
     .jpeg({
@@ -67,7 +67,7 @@ async function deleteImage(public_id, estoreid, resellid) {
     "product-images",
     "package" + String(resellid),
     "estore" + String(estoreid),
-    "settings"
+    "settings",
   );
 
   try {
