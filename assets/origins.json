@@ -1,0 +1,61 @@
+{
+  "origins1": [
+    "https://cosmic.clavstore.com",
+    "https://store.clavstore.com",
+    "https://clavstore.com",
+    "https://www.clavstore.com",
+    "https://learnclavstore.com",
+    "https://www.learnclavstore.com",
+    "http://localhost:3005",
+    "http://localhost:3004",
+    "capacitor://localhost",
+    "ionic://localhost",
+    "http://localhost"
+  ],
+  "origins2": [
+    "https://88innokonstructsupplies.com",
+    "https://www.88innokonstructsupplies.com",
+    "https://farmacianikap.com",
+    "https://www.farmacianikap.com",
+    "https://kanamionlinegrocery.com",
+    "https://www.kanamionlinegrocery.com",
+    "https://markshopping.com",
+    "https://www.markshopping.com",
+    "https://northernlinksupplies.com",
+    "https://www.northernlinksupplies.com",
+    "https://onegappstore.com",
+    "https://www.onegappstore.com",
+    "https://plantasyjungle.com",
+    "https://www.plantasyjungle.com",
+    "https://sarilinkcart.com",
+    "https://www.sarilinkcart.com",
+    "https://yeyestore.yeyebooking.com",
+    "https://zionexpressmart.com",
+    "https://www.zionexpressmart.com"
+  ],
+  "origins3": [
+    "https://benchelles.com",
+    "https://www.benchelles.com",
+    "https://ermacorp.com",
+    "https://www.ermacorp.com",
+    "https://townfreshfoodproducts.com",
+    "https://www.townfreshfoodproducts.com"
+  ],
+  "origins4": [
+    "https://store.clicknpays.com",
+    "https://clicknpays.com",
+    "https://www.clicknpays.com",
+    "https://redandbluestore.com",
+    "https://www.redandbluestore.com",
+    "https://store.drinelectronics.com",
+    "https://drinelectronics.com",
+    "https://www.drinelectronics.com",
+    "https://store.genesisdrug.com",
+    "https://genesisdrug.com",
+    "https://www.genesisdrug.com",
+    "https://gluopharmacy.com",
+    "https://www.gluopharmacy.com",
+    "https://vaclaran.com",
+    "https://www.vaclaran.com"
+  ]
+}
