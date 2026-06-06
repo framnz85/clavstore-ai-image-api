@@ -17,7 +17,12 @@ if (process.env.NODE_ENV !== "production") {
 
 app.use(express.json({ limit: "2mb" }));
 
-const allowedOrigins = [...origins.origins1, ...origins.origins2];
+const allowedOrigins = [
+  ...origins.origins1,
+  ...origins.origins2,
+  ...origins.origins3,
+  ...origins.origins4,
+];
 
 app.use(
   cors({
