@@ -206,6 +206,7 @@ const estoreSchema = new mongoose.Schema(
     upPackage2: ObjectId,
     upStatus2: {
       type: String,
+      default: "Pending",
       enum: ["Active", "Pending"],
     },
     recurring2: Number,
